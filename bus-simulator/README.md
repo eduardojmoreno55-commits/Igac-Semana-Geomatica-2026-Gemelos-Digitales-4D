@@ -70,15 +70,17 @@ Al arrancar:
 
 | Método | Ruta | Propósito |
 |---|---|---|
-| `GET` | `/` | Panel web (fase/progreso/tiempo restante de cada bus) |
-| `GET` | `/api/status` | `{ lapDurationMs, buses: [{ busId, phase, phaseProgress, remainingMs }] }` |
+| `GET` | `/` | Panel web (fase/progreso/tiempo restante/duración de vuelta de cada bus) |
+| `GET` | `/api/status` | `{ buses: [{ busId, phase, phaseProgress, remainingMs, lapDurationMs }] }` |
 
 No hay endpoints de disparo manual: el ciclo circuito→recarga es automático.
+`lapDurationMs` varía por bus: se deriva de la longitud real de calles de su
+circuito (ver `bus-simulator/src/domain/circuits.ts`) y de `TARGET_SPEED_KMH`.
 
 ## Variables de entorno
 
 Ver `.env.example`. Claves: `FROST_URL`, `PORT` (3003), `BASE_TICK_MS`
-(2000), `LAP_DURATION_MS` (120000 = 2 min), `DWELL_DURATION_MS` (7000),
+(2000), `TARGET_SPEED_KMH` (28), `DWELL_DURATION_MS` (7000),
 `BATTERY_FLOOR_PCT` (15).
 
 ## Reglas de estado (referencia para el frontend)
@@ -102,7 +104,10 @@ las rampas de batería de `TelemetryGenerator` y la interpolación espacial de
 
 ## Circuitos
 
-Loops ilustrativos (~1 km, cuadrados) centrados en cuatro zonas de Bogotá.
-Las coordenadas son aproximadas y no siguen calles reales exactas; ver
-`src/domain/circuits.ts`. Rutas reales desde OSM/Overpass quedan como
-extensión posterior.
+Loops sobre calles reales en cuatro zonas de Bogotá (Chapinero, La Candelaria,
+Usaquén, Suba), obtenidos consultando una vez el motor de ruteo OSRM
+(basado en OpenStreetMap) y guardados como coordenadas estáticas; ver
+`src/domain/circuits.ts` para el detalle y cómo regenerarlos. Sus longitudes
+reales varían bastante entre sí (de ~1.9 km a ~7.8 km), por lo que la
+duración de vuelta se deriva por bus a partir de `TARGET_SPEED_KMH` en vez de
+ser un valor fijo compartido.

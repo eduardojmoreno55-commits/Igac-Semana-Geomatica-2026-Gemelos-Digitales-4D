@@ -4,7 +4,7 @@ import { CatalogBootstrap } from "./app/CatalogBootstrap.js";
 import { CircuitGeometry } from "./app/CircuitGeometry.js";
 import { RouteController } from "./app/RouteController.js";
 import { SimulationLoop } from "./app/SimulationLoop.js";
-import { TelemetryGenerator } from "./app/TelemetryGenerator.js";
+import { lapDurationMsForLength, TelemetryGenerator } from "./app/TelemetryGenerator.js";
 import { BUSES } from "./domain/buses.js";
 import { CIRCUITS } from "./domain/circuits.js";
 import { ConsoleLogger } from "./infrastructure/ConsoleLogger.js";
@@ -59,9 +59,14 @@ async function main(): Promise<void> {
     CIRCUITS.map((circuit) => [circuit.id, new CircuitGeometry(circuit.line)]),
   );
 
-  const route = new RouteController(config.lapDurationMs, config.dwellDurationMs);
+  const route = new RouteController(config.dwellDurationMs);
   for (const runtime of runtimes) {
-    route.register(runtime.bus.id, runtime.bus.startOffsetMs);
+    const geometry = circuitGeometries.get(runtime.bus.circuitId);
+    if (!geometry) {
+      throw new Error(`Circuito desconocido para ${runtime.bus.name}: ${runtime.bus.circuitId}`);
+    }
+    const lapDurationMs = lapDurationMsForLength(geometry.totalLengthMeters(), config.targetSpeedKmh);
+    route.register(runtime.bus.id, runtime.bus.startOffsetMs, lapDurationMs);
   }
 
   const generator = new TelemetryGenerator();
@@ -73,18 +78,17 @@ async function main(): Promise<void> {
     frost,
     logger,
     config.baseTickMs,
-    config.lapDurationMs,
     config.batteryFloorPct,
   );
   loop.start();
 
-  const app = createControlApp(route, loop, config.lapDurationMs);
+  const app = createControlApp(route, loop);
   await app.listen({ port: config.port, host: "0.0.0.0" });
 
   logger.info("Panel de control listo", {
     panel: `http://localhost:${config.port}`,
     buses: runtimes.length,
-    lapDuration: `${config.lapDurationMs / 1000}s`,
+    targetSpeedKmh: config.targetSpeedKmh,
     dwellDuration: `${config.dwellDurationMs / 1000}s`,
   });
 

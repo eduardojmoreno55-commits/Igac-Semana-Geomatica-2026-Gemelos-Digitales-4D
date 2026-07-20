@@ -11,18 +11,13 @@ import { CONTROL_PANEL_HTML } from "./controlPanelHtml.js";
  *
  * Rutas expuestas:
  * - `GET /`: HTML embebido del panel.
- * - `GET /api/status`: fase, progreso y tiempo restante de cada bus.
+ * - `GET /api/status`: fase, progreso, tiempo restante y duración de vuelta de cada bus.
  *
  * @param route Estado y ciclo de vida del circuito de cada bus.
  * @param loop Catálogo de buses disponibles.
- * @param lapDurationMs Duración de vuelta, expuesta como referencia visual.
  * @returns Instancia Fastify lista para escuchar en un puerto.
  */
-export function createControlApp(
-  route: RouteController,
-  loop: SimulationLoop,
-  lapDurationMs: number,
-): FastifyInstance {
+export function createControlApp(route: RouteController, loop: SimulationLoop): FastifyInstance {
   const app = Fastify({ logger: false });
 
   /** Entrega el HTML autónomo del panel, sin depender de archivos estáticos. */
@@ -33,7 +28,6 @@ export function createControlApp(
   /** Entrega el estado de cada bus para el panel y para clientes de automatización. */
   app.get("/api/status", () => {
     return {
-      lapDurationMs,
       buses: loop.allBusIds().map((busId) => route.status(busId)),
     };
   });

@@ -109,6 +109,21 @@ export class TelemetryGenerator {
   }
 }
 
+/**
+ * Duración de vuelta que produce, en promedio, la velocidad objetivo dada
+ * para un circuito de la longitud indicada. Inversa de la fórmula usada en
+ * `TelemetryGenerator.speedKmh`; permite derivar `lapDurationMs` por bus a
+ * partir de la longitud real de su circuito en vez de fijar una duración
+ * compartida que produciría velocidades distintas (y a veces absurdas) en
+ * circuitos de longitud muy diferente.
+ * @param circuitLengthMeters Longitud total del circuito, en metros.
+ * @param targetSpeedKmh Velocidad promedio deseada, en km/h.
+ * @returns Duración de vuelta, en milisegundos.
+ */
+export function lapDurationMsForLength(circuitLengthMeters: number, targetSpeedKmh: number): number {
+  return Math.round((circuitLengthMeters / 1000) / targetSpeedKmh * 3_600_000);
+}
+
 /** Limita un valor al intervalo [0, 1]. */
 function clamp01(value: number): number {
   if (value < 0) return 0;

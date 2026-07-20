@@ -6,9 +6,9 @@ describe("CircuitGeometry", () => {
   const circuit = CIRCUITS[0]!;
   const geometry = new CircuitGeometry(circuit.line);
 
-  it("tiene una longitud positiva, coherente con un loop de ~1km", () => {
-    expect(geometry.totalLengthMeters()).toBeGreaterThan(500);
-    expect(geometry.totalLengthMeters()).toBeLessThan(2000);
+  it("tiene una longitud positiva, coherente con el loop real de Chapinero (~2.35 km)", () => {
+    expect(geometry.totalLengthMeters()).toBeGreaterThan(1500);
+    expect(geometry.totalLengthMeters()).toBeLessThan(3000);
   });
 
   it("progreso 0 coincide con el punto de partida del circuito", () => {

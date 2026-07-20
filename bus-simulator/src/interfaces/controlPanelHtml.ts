@@ -38,44 +38,45 @@ export const CONTROL_PANEL_HTML = /* html */ `<!doctype html>
 <body>
   <main class="card">
     <h1>Simulador de buses eléctricos</h1>
-    <p class="sub">Zona de estudio: Bogotá - 4 circuitos, vueltas de 2 min con recarga automática</p>
+    <p class="sub">Zona de estudio: Bogotá - 4 circuitos sobre calles reales, con recarga automática</p>
 
     <table>
       <thead>
-        <tr><th>Bus</th><th>Fase</th><th>Progreso</th><th>Restante</th></tr>
+        <tr><th>Bus</th><th>Fase</th><th>Progreso</th><th>Restante</th><th>Vuelta</th></tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
 
     <p class="facts">
-      Cada bus circula su circuito en <code id="lap">120</code>s; al completarlo se detiene
-      unos segundos en estado <code>CHARGING</code> mientras la batería vuelve al 100%, y
-      reinicia la vuelta. El ciclo se repite indefinidamente sin intervención manual.
+      Cada bus circula su propio circuito real; la duración de vuelta varía según la longitud
+      de las calles de cada zona (columna "Vuelta"). Al completarla se detiene unos segundos en
+      estado <code>CHARGING</code> mientras la batería vuelve al 100%, y reinicia la vuelta.
+      El ciclo se repite indefinidamente sin intervención manual.
     </p>
   </main>
 
   <script>
     const rows = document.getElementById("rows");
-    const lap = document.getElementById("lap");
 
     async function refresh() {
       try {
         const res = await fetch("/api/status");
         const s = await res.json();
-        lap.textContent = Math.round(s.lapDurationMs / 1000);
         rows.innerHTML = s.buses.map((b) => {
           const pct = Math.round(b.phaseProgress * 100);
           const secs = Math.ceil(b.remainingMs / 1000);
+          const lapSecs = Math.round(b.lapDurationMs / 1000);
           const label = b.phase === "charging" ? "Cargando" : "Circulando";
           return \`<tr>
             <td>\${b.busId}</td>
             <td><span class="badge \${b.phase}">\${label}</span></td>
             <td>\${pct}%</td>
             <td>\${secs}s</td>
+            <td>\${lapSecs}s</td>
           </tr>\`;
         }).join("");
       } catch (e) {
-        rows.innerHTML = '<tr><td colspan="4">Sin conexión</td></tr>';
+        rows.innerHTML = '<tr><td colspan="5">Sin conexión</td></tr>';
       }
     }
 

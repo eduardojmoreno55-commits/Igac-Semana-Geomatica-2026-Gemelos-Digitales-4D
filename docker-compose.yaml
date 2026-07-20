@@ -58,7 +58,7 @@ services:
       - FROST_URL=http://web:8080/FROST-Server/v1.1
       - PORT=3003
       - BASE_TICK_MS=6000
-      - LAP_DURATION_MS=120000
+      - TARGET_SPEED_KMH=28
       - DWELL_DURATION_MS=7000
       - BATTERY_FLOOR_PCT=15
     ports:

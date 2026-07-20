@@ -22,7 +22,6 @@ export class SimulationLoop {
    * @param frost Cliente REST usado para mover Locations y publicar observaciones.
    * @param logger Registrador de inicio y fallos parciales.
    * @param tickMs Intervalo entre ciclos de publicación en milisegundos.
-   * @param lapDurationMs Duración nominal de una vuelta, usada para derivar la velocidad promedio.
    */
   public constructor(
     private readonly runtimes: BusRuntime[],
@@ -32,7 +31,6 @@ export class SimulationLoop {
     private readonly frost: FrostClient,
     private readonly logger: Logger,
     private readonly tickMs: number,
-    private readonly lapDurationMs: number,
     private readonly batteryFloorPct: number,
   ) {}
 
@@ -91,7 +89,11 @@ export class SimulationLoop {
       const dwellProgress = this.route.dwellProgress(bus.id);
       const [lon, lat] = geometry.pointAtProgress(dwelling ? 1 : lapProgress);
 
-      const speed = this.generator.speedKmh(dwelling, geometry.totalLengthMeters(), this.lapDurationMs);
+      const speed = this.generator.speedKmh(
+        dwelling,
+        geometry.totalLengthMeters(),
+        this.route.lapDurationMsOf(bus.id),
+      );
       const battery = this.generator.battery(lapProgress, dwelling, dwellProgress, this.batteryFloorPct);
       const batteryTemperature = this.generator.batteryTemperature(battery, dwelling);
 

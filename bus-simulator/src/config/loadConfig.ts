@@ -8,8 +8,8 @@ export interface AppConfig {
   port: number;
   /** Periodo del bucle base de publicacion, en milisegundos. */
   baseTickMs: number;
-  /** Duracion de una vuelta completa al circuito, en milisegundos. */
-  lapDurationMs: number;
+  /** Velocidad promedio objetivo por bus, en km/h; determina la duracion de vuelta segun la longitud real de cada circuito. */
+  targetSpeedKmh: number;
   /** Duracion de la parada de recarga al completar la vuelta, en milisegundos. */
   dwellDurationMs: number;
   /** Nivel minimo de bateria al completar la vuelta, en porcentaje. */
@@ -50,7 +50,7 @@ export function loadConfig(): AppConfig {
     ),
     port: parseIntEnv("PORT", process.env.PORT, 3003),
     baseTickMs: parseIntEnv("BASE_TICK_MS", process.env.BASE_TICK_MS, 2000),
-    lapDurationMs: parseIntEnv("LAP_DURATION_MS", process.env.LAP_DURATION_MS, 120000),
+    targetSpeedKmh: parseIntEnv("TARGET_SPEED_KMH", process.env.TARGET_SPEED_KMH, 28),
     dwellDurationMs: parseIntEnv("DWELL_DURATION_MS", process.env.DWELL_DURATION_MS, 7000),
     batteryFloorPct: parseIntEnv("BATTERY_FLOOR_PCT", process.env.BATTERY_FLOOR_PCT, 15),
     logLevel: process.env.LOG_LEVEL ?? "info",

@@ -52,9 +52,8 @@ Define el modelo de negocio sin depender de tecnología específica.
   - Desfases de arranque escalonados: 0s, 30s, 60s, 90s → no sincronizan en recarga
 
 - **`circuits.ts`**: Catálogo de zonas geográficas (4 circuitos)
-  - Loops cuadrados de ~1 km (dimensionados para recorrerse en 2 min a ~30 km/h)
-  - Centros aproximados en Bogotá (Chapinero, Candelaria, Usaquén, Suba)
-  - Notar: coordenadas ilustrativas, no siguen calles reales (extensión futura: OSM/Overpass)
+  - Loops sobre calles reales de Bogotá (Chapinero, Candelaria, Usaquén, Suba), obtenidos una sola vez con el motor de ruteo OSRM y guardados como coordenadas estáticas (sin dependencia de red en tiempo de ejecución)
+  - Longitudes reales muy distintas entre sí (~1.9 km a ~7.8 km); por eso la duración de vuelta ya no es un valor fijo compartido, se deriva por bus (ver `TARGET_SPEED_KMH` y `lapDurationMsForLength` en `TelemetryGenerator.ts`)
 
 ### 2. **App** (`src/app/`)
 
@@ -129,7 +128,7 @@ Controladores HTTP y puntos de entrada de usuario.
 
 - **`createControlApp.ts`**: Fastify app de solo lectura
   - **`GET /`**: sirve HTML embebido del panel de control
-  - **`GET /api/status`**: retorna `{ lapDurationMs, buses: [{ busId, phase, phaseProgress, remainingMs }] }`
+  - **`GET /api/status`**: retorna `{ buses: [{ busId, phase, phaseProgress, remainingMs, lapDurationMs }] }`
   - Actualización en vivo desde cliente JavaScript cada 1 segundo
 
 - **`controlPanelHtml.ts`**: HTML + CSS + JavaScript embebido
@@ -145,7 +144,7 @@ Carga y validación de configuración desde variables de entorno.
   - `FROST_URL` (default: http://localhost:8080/FROST-Server/v1.1)
   - `PORT` (default: 3003)
   - `BASE_TICK_MS` (default: 2000 ms, ajustable a 6000 para entornos de producción)
-  - `LAP_DURATION_MS` (default: 120000 = 2 min)
+  - `TARGET_SPEED_KMH` (default: 28 km/h; la duración de vuelta de cada bus se deriva de esta velocidad y de la longitud real de su circuito, no es un valor fijo compartido)
   - `DWELL_DURATION_MS` (default: 7000 = 7 seg)
   - `BATTERY_FLOOR_PCT` (default: 15%)
   - `LOG_LEVEL` (default: "info", informativo)

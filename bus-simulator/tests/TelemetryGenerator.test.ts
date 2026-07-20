@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TelemetryGenerator } from "../src/app/TelemetryGenerator.js";
+import { lapDurationMsForLength, TelemetryGenerator } from "../src/app/TelemetryGenerator.js";
 
 describe("TelemetryGenerator", () => {
   it("velocidad es 0 durante la recarga", () => {
@@ -34,5 +34,20 @@ describe("TelemetryGenerator", () => {
     expect(generator.status(10, 30, false)).toBe("CRITICAL");
     expect(generator.status(100, 80, false)).toBe("CRITICAL");
     expect(generator.status(10, 80, true)).toBe("CHARGING");
+  });
+});
+
+describe("lapDurationMsForLength", () => {
+  it("es la inversa exacta de speedKmh: recorrer la duración derivada da la velocidad objetivo", () => {
+    const generator = new TelemetryGenerator(() => 0.5); // ruido centrado en 0
+    const lapDurationMs = lapDurationMsForLength(2354, 28);
+    const speed = generator.speedKmh(false, 2354, lapDurationMs);
+    expect(speed).toBeCloseTo(28, 0);
+  });
+
+  it("circuitos más largos producen vueltas más largas a la misma velocidad objetivo", () => {
+    const short = lapDurationMsForLength(1950, 28);
+    const long = lapDurationMsForLength(7798, 28);
+    expect(long).toBeGreaterThan(short);
   });
 });
