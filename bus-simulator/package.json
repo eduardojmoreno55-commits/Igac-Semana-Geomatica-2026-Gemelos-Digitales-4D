@@ -1,0 +1,27 @@
+{
+  "name": "bus-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Node.js 24 simulator that seeds electric buses on Bogota circuits in FROST-Server and streams speed/battery/battery-temperature observations, moving each bus along its route with a periodic charging stop.",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run --exclude tests/**/*.js"
+  },
+  "dependencies": {
+    "@turf/turf": "^7.2.0",
+    "dotenv": "^16.6.1",
+    "fastify": "^5.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.15",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
