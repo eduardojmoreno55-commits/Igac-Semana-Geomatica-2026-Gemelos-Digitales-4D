@@ -9,6 +9,11 @@ services:
       - plugins_modelLoader_enable=true
       - plugins_multiDatastream_enable=false
       - plugins_actuation_enable=false
+      # MQTT TCP existente y MQTT sobre WebSocket para clientes de navegador.
+      - mqtt_Enabled=true
+      - mqtt_Host=0.0.0.0
+      - mqtt_Port=1883
+      - mqtt_WebsocketPort=9876
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - persistence_db_driver=org.postgresql.Driver
@@ -16,25 +21,51 @@ services:
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
       - persistence_autoUpdateDatabase=true
+      - TZ=America/Bogota
     ports:
       - 8080:8080
       - 1883:1883
+      - 9876:9876
     depends_on:
       database:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://localhost:8080/FROST-Server/v1.1 > /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   database:
-    platform: linux/amd64
+    # platform: linux/amd64
     image: postgis/postgis:16-3.4-alpine
     environment:
       - POSTGRES_DB=sensorthings
       - POSTGRES_USER=sensorthings
       - POSTGRES_PASSWORD=ChangeMe
+      - TZ=America/Bogota
+    ports:
+      - 5432:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
       interval: 2s
       timeout: 2s
       retries: 10
+
+  bus-simulator:
+    build: ./bus-simulator
+    environment:
+      - FROST_URL=http://web:8080/FROST-Server/v1.1
+      - PORT=3003
+      - BASE_TICK_MS=6000
+      - LAP_DURATION_MS=120000
+      - DWELL_DURATION_MS=7000
+      - BATTERY_FLOOR_PCT=15
+    ports:
+      - 3003:3003
+    depends_on:
+      web:
+        condition: service_started
 
 volumes:
     postgis_volume:
