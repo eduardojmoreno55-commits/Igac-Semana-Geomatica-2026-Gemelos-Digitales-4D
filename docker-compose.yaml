@@ -1,7 +1,7 @@
 name: frost_allinone
 services:
   web:
-    platform: linux/amd64
+    # platform: linux/amd64
     image: fraunhoferiosb/frost-server:latest
     environment:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
@@ -14,6 +14,8 @@ services:
       - mqtt_Host=0.0.0.0
       - mqtt_Port=1883
       - mqtt_WebsocketPort=9876
+      - mqtt_SubscribeMessageQueueSize=2000
+      - mqtt_SubscribeThreadPoolSize=20
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - persistence_db_driver=org.postgresql.Driver
